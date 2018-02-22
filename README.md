@@ -116,3 +116,71 @@ The 90% confidence interval estimate of the linear regression coefficients βi^ 
  Income|         3.080547|    3.218063|
  CreditUtil|  1429.274898| 1507.712362|
  StudentYes|  -150.962338| -133.448192|
+
+## Results
+
+### Exploring Explanation Models
+
+In the following, we explore reasonably “small” models that are good at explaining the relationship between the response and the predictors.
+
+## Adding Interactions
+
+Using the additive model based on Income, Credit Utilization and Student as a starting point, we investigate further the effect of two-way and three-way interactions between these variables.
+
+### Significance of Regression
+
+We now test for significance between the two hypotheses:
+
+- H0: Rating is a linear estimate of Income, Credit Utilization and Student predictor variables
+- H1: Rating is a linear estimate of Income, Credit Utilization, Student and the interaction terms between these predictor variables
+
+Since the p-value(**2.799674e-33**) is incredibly low, we reject the null hypothesis and accept the alternate hypothesis.
+
+### Improvement in coefficient of determination (R2)
+
+We also investigate the improvement in the coefficient of determination due to interactions. Compared to the value **0.9649** obtained for the additive model based on Income, Credit Utilization and Student, if we include the interaction terms, the R2 value improves to **0.9765**.
+
+Given the high value R2 and the low number of coefficients (length(coef(mlr_rating_inc_credit_util_stud_inter))) in this model, we conclude that this model serves as a good explanation model.
+
+## Exploring Predictive Models
+
+Here, we explore models that have small errors and hence are good for making predictions. To find models for prediction, we use the selection criterion that implicitly penalizes larger models, such as the leave-one-out cross-validated RMSE (LOOCV RMSE). So long as the model does not over-fit, we do not actually care how large the model becomes. Explaining the relationship between the variables is not our goal here and we don’t need to worry about model assumptions.
+
+For each of the following models we perform a step search to obtain the best model based on the AIC and BIC criteria:
+
+1. An additive model that includes all the predictor variables.
+2. A model based on all possible 2-way interactions of the predictor variables.
+3. A model based on all possible 3-way interactions of the predictor variables
+4. A model based on 3rd order polynomial terms of the Income and CreditUtil variables
+5. A model based on all possible 2-way interactions and 3rd order polynomial terms of the Income and CreditUtil variables
+
+In the case of model 2, two variants of step search were performed:
+
+- In the first variant, no scope argument was provided.
+- In the second variant, a single formula was provided in the scope argument that represented the 9-way interaction between all the predictor variables: **Income, Cards, Age, Education, Gender, Student, Married, Ethnicity and CreditUtil**
+
+Table 1 provides a summary of the LOOCV RMSE achieved and the number of regression coefficients for each of the models considered. As seen in the Table, the step-wise search based on the 2-way interaction and third order polynomial terms of the Income and Credit Utilization predictor variables achieves the lowest LOOCV RMSE.
+
+
+**Table 1: Comparing LOOCV RMSE for different fitted models**
+
+|MODEL| LOOCV RMSE| Number of Coefficients|
+| :---:         |     :---:      |          :---: |
+Additive (BIC)|	29.2856157|	8
+Two-way interaction (BIC)|	24.3232235|	9
+Two-way interaction w/ scope (AIC)|	23.146347|	66
+Three-way interaction (AIC)|	24.6682874|	99
+Third order polynomial (AIC)|	29.4252018|	12
+Two-way interaction & Third order polynomial(AIC)|	21.9256914|	30
+
+## Discussion
+
+In this study, we investigated the problem of modeling and prediction of a person’s credit score as a function of multiple variables such as a person’s income, credit card limit, outstanding balance, etc. An elementary statistical analysis was performed on each of these variables to determine the distribution (histograms, boxplots) of these variables and metrics (estimation coefficients, mean and variance of residuals ) related to simple linear regression. Several techniques studied throughout STAT420 as appropriate were applied here in this study.
+
+The dataset was slightly modified to introduce a new predictor variable related to credit utilization rate as a function of balance and credit limit as this variable is directly used in determining a person’s credit score. A key finding upfront was that credit score can be well explained by a linear combination of three important predictor variables (Income, Credit Utilization rate and whether the person is a student or not). In fact, it was shown that such a model is a significant when compared to a model based on all predictors for levels of significance less than or equal to 2%. An analysis of βi^ coefficients and confidence interval estimates was also obtained for this model.
+
+Next, explanation models were explored from the point of view of maximizing R2 and using as few coefficients as possible. Towards this objective, a model based on 2-way and 3-way interaction between the Income, Credit Utlization and Student predictor variables was obtained leading to **R2 = 0.9765 and utilization of 8 coefficients**.
+
+Further checks were performed on the explanation model assumptions for linearity, constant variance and normality. An exercise was also performed to identify subsets of the data that led to a favorable decision on the constant variance assumption via the Breusch-Pagan test. Also, an outlier analysis was performed on this model to assess the sensitivity of regression coefficients to influential observations and the prediction of Rating estimate had we used a model that was trained on data without these influential observations.
+
+Finally we also explored a few candidate models to determine the best predictive model using LOOCV RMSE as a metric. Methods based on step-wise search using the AIC and BIC criteria were used for this purpose. Amongst the candidates considered here, a model derived based on 2-way interactions and third order terms using **30 coefficients was shown to achieve the lowest LOOCV RMSE (21.926 )**
